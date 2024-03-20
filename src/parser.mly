@@ -1,3 +1,7 @@
+%{
+    open Secd;;
+%}
+
 %token LAMBDA
 %token LPAREN RPAREN LBRACE RBRACE
 %token SEP DOT EOF
@@ -10,8 +14,7 @@
 %left TIMES DIVIDE
 
 %start main
-%type <Ast.expression list> main
-%type <Ast.expression> expression
+%type <Secd.expression list> main
 
 %%
 main:
@@ -21,15 +24,15 @@ main:
 
 expression:
     | LBRACE expression RBRACE {$2}
-    | INT {Ast.Int $1}
-    | VAR {Ast.Var $1}
-    | expression PLUS expression {Ast.Operation (Ast.Add, $1, $3)}
-    | expression MINUS expression {Ast.Operation (Ast.Sub, $1, $3)}
-    | expression TIMES expression {Ast.Operation (Ast.Mul, $1, $3)}
-    | expression DIVIDE expression {Ast.Operation (Ast.Div, $1, $3)}
+    | INT {Int $1}
+    | VAR {Var $1}
+    | expression PLUS expression {Operation (Add, $1, $3)}
+    | expression MINUS expression {Operation (Sub, $1, $3)}
+    | expression TIMES expression {Operation (Mul, $1, $3)}
+    | expression DIVIDE expression {Operation (Div, $1, $3)}
 
-    | LAMBDA VAR DOT expression {Ast.Lambda ($2, $4)}
-    | LPAREN expression expression RPAREN {Ast.Application ($2, $3)}
+    | LAMBDA VAR DOT expression {Lambda ($2, $4)}
+    | LPAREN expression expression RPAREN {Application ($2, $3)}
 ;
 
 

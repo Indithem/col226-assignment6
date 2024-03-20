@@ -4,26 +4,26 @@ let print_gaps n =
   done;
   if n > 0 then Printf.printf "|__"
 ;;
-
-let rec print_ast p (ast:Ast.expression)=
+open Secd;;
+let rec print_ast p (ast:expression)=
   print_gaps p;
   match ast with
-  | Ast.Int i -> Printf.printf "Int: %d\n" i
-  | Ast.Var x -> Printf.printf "Variable: %s\n" x
-  | Ast.Operation (op, e1, e2) ->
+  | Int i -> Printf.printf "Int: %d\n" i
+  | Var x -> Printf.printf "Variable: %s\n" x
+  | Operation (op, e1, e2) ->
     let op_str = match op with
-      | Ast.Add -> "Add"
-      | Ast.Sub -> "Sub"
-      | Ast.Mul -> "Mul"
-      | Ast.Div -> "Div"
+      | Add -> "Add"
+      | Sub -> "Sub"
+      | Mul -> "Mul"
+      | Div -> "Div"
     in
     Printf.printf "Operation: %s\n" op_str;
     print_ast (p+1) e1;
     print_ast (p+1) e2
-  | Ast.Lambda (x, e) ->
+  | Lambda (x, e) ->
     Printf.printf "Lambda: with parameter %s\n" x;
     print_ast (p+1) e
-  | Ast.Application (e1, e2) ->
+  | Application (e1, e2) ->
     Printf.printf "Application:\n";
     print_ast (p+1) e1;
     print_ast (p+1) e2

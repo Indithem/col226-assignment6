@@ -1,5 +1,5 @@
 cargs = -I build -g
-files = lexer parser ast main
+files = lexer parser secd main
 test_files = $(wildcard tests/*)
 
 exec: $(foreach file, $(files), build/$(file).cmo)
@@ -16,7 +16,7 @@ build/%.cmo: src/%.ml
 	@mkdir -p build
 	ocamlc -c -o $@ $< $(cargs)
 
-build/parser.cmo: src/parser.mly build/ast.cmo
+build/parser.cmo: src/parser.mly build/secd.cmo
 	@mkdir -p build
 	ocamlyacc -b build/parser src/parser.mly
 	ocamlc -c -o $@ build/parser.mli $(cargs)
