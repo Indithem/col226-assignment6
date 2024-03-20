@@ -14,4 +14,4 @@ A compiler that takes human readable code (the toy language) and compiles it int
 A parser and lexer are made using ocamllex and ocamlyacc. These parse the toy language.
 
 # Toy Language Syntax
-<todo>
+[see this file](src/syntax.md)
