@@ -8,6 +8,7 @@ let alphanumerics = ['A'-'Z' 'a'-'z' '0'-'9']
 
 rule lexer = parse
     | whitespace+ { lexer lexbuf }
+    | "#" [^'\n']* { lexer lexbuf }
 
     | "lambda" { LAMBDA }
     

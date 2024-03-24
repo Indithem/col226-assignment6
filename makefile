@@ -8,9 +8,11 @@ exec: $(foreach file, $(files), build/$(file).cmo)
 .PHONY: tests
 tests: exec
 	@for file in $(test_files); do \
-		echo "Testing with $$file"; \
+		echo "----------------------------Testing with $$file-----------------------------------"; \
 		./exec < $$file; \
 	done
+
+build/main.cmo: src/main.ml build/secd.cmo
 
 build/%.cmo: src/%.ml
 	@mkdir -p build

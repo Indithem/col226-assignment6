@@ -33,6 +33,7 @@ let rec print_ast p (ast:expression)=
 let lexbufr = Lexing.from_channel stdin in
 try
 let stmts = Parser.main Lexer.lexer lexbufr in
+Printf.printf "Parsed %d statements\n" (List.length stmts);
 List.iter (print_ast 0) stmts;
 with exn ->
   begin
