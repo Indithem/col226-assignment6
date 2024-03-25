@@ -38,6 +38,14 @@ let rec print_ast p (ast:expression)=
     print_ast (p+2) e2;
     Printf.printf "Else:\n";
     print_ast (p+2) e3
+  | Tuple es ->
+    Printf.printf "Tuple List:\n";
+    List.iter (fun e -> print_ast (p+1) e) es
+  | Project (i, e) ->
+    Printf.printf "Projection of {}th element evaluated by \n";
+    print_ast (p+1) i;
+    Printf.printf "from the tuple:\n";
+    print_ast (p+1) e
 ;;
 
 let rec print_opcodes p (opcodes:opcode list) =
@@ -65,19 +73,28 @@ let rec print_opcodes p (opcodes:opcode list) =
         print_opcodes (p+1) ops1;
         Printf.printf "ELSE:\n";
         print_opcodes (p+1) ops2
+      | MAKE_TUPLE opslist ->
+        Printf.printf "PUSH TUPLE LIST with %d elements\n" (List.length opslist);
+        List.iter (fun ops -> print_opcodes (p+1) ops) opslist
+      | PROJECT intOps ->
+        Printf.printf "PROJECTION of result \n";
+        print_opcodes (p+1) intOps
   in
   List.iter helper_printer opcodes
 
 let rec print_answers p a =
+  print_gaps p;
   match a with
-    | Const c -> print_gaps p; print_const_inbuilt c
+    | Const c -> print_const_inbuilt c
     | VClosure(x, ops, env) ->
-      print_gaps p;
       Printf.printf "Value Closure with parameter %s in \n" x;
       print_opcodes (p+2) ops;
       print_gaps (p+1);
       Printf.printf "Environment:\n";
       StringMap.iter (fun k v -> print_gaps (p+2);Printf.printf "%s ->\n " k; print_answers (p+3) v) env
+    | Tuple vs ->
+      Printf.printf "Answer Tuple List with %d elements\n" (List.length vs);
+      List.iter (fun v -> print_answers (p+1) v) vs
 
 let print_environment env =
   StringMap.iter (fun k v -> Printf.printf "%s -> " k; print_answers 0 v) env

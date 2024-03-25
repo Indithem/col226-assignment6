@@ -15,6 +15,8 @@ rule lexer = parse
     | "ifthenelse" { IFTHENELSE }
     | "true" { BOOLCONST (true) }
     | "false" { BOOLCONST (false) }
+
+    | "first" { FIRST }
     
     | "+" { PLUS }
     | "-" { MINUS }

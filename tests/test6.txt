@@ -1,6 +1,4 @@
 # shall fail!
-false ifthenelse 
-{1+2}
 {
     (
     (

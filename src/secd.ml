@@ -13,6 +13,8 @@ type expression =
   | Const of inbuilt_const_types
   | Operation of inbuilt_operations * expression * expression
   | Ifthenelse of expression * expression * expression
+  | Tuple of expression list
+  | Project of expression * expression
 
   | Var of string
   | Lambda of string * expression
@@ -24,6 +26,8 @@ type opcode =
   | POP
   | OPERATE of inbuilt_operations
   | IFTHENELSE of opcode list * opcode list
+  | MAKE_TUPLE of opcode list list
+  | PROJECT of opcode list
 
   | LOOKUP of string
   | MAKE_CLOSURE of string * opcode list 
@@ -41,7 +45,8 @@ let rec compile e =
     | Lambda (s, e) -> [MAKE_CLOSURE (s, compile e @ [RETURN])]
     | Application (e1, e2) -> (compile e1) @ (compile e2) @ [APPLY_CLOSURE]
     | Ifthenelse (e1, e2, e3) -> (compile e1) @ [IFTHENELSE (compile e2, compile e3)]
-    
+    | Tuple es -> [MAKE_TUPLE (List.map compile es)]
+    | Project (i, e) -> (compile e) @ [PROJECT (compile i)]
 ;;
 
 type todo = unit;;
@@ -49,6 +54,7 @@ module StringMap = Map.Make(String)
 
 type answers = 
   | Const of inbuilt_const_types
+  | Tuple of answers list
   | VClosure of string * opcode list * answers StringMap.t
 type table = answers StringMap.t
 let bind x a t :table =
@@ -83,6 +89,24 @@ let rec secd_machine (s:stack) (e:environment) (c:code) (d:dump) =
       secd_machine s e ((if b then c1 else c2) @ c) d
     | _, _, IFTHENELSE (_)::_, _ -> raise (SECD_Exception (((s,e,c)::d),"Expected a boolean value"))
     
+    | s, e, MAKE_TUPLE (cs)::c, d ->
+      secd_machine 
+        ((Tuple (List.map (fun c -> secd_machine [] e c [])
+        cs))::s)
+        e c d
+    | Tuple vs::s, e, PROJECT i::c, d ->
+      let v =
+        let eval = secd_machine [] e i [] in
+        let eval_int = match eval with
+          | Const (Int i) -> i
+          | _ -> raise (SECD_Exception (((s,e,c)::d),"Expected an integer for list indexing"))
+        in
+        try
+          List.nth vs eval_int
+        with _ -> raise (SECD_Exception (((s,e,c)::d),"Index out of bounds"))
+      in
+      secd_machine (v::s) e c d
+
     | s, e, LOOKUP x::c, d -> 
       let v = 
         try StringMap.find x e 
