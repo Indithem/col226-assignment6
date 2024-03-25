@@ -28,6 +28,7 @@ rule lexer = parse
 
     | ";" {SEP}
     | "." {DOT}
+    | "," {COMMA}
 
     | alphanumerics+ { VAR (Lexing.lexeme lexbuf) }
 

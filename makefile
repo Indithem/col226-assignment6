@@ -2,9 +2,6 @@ cargs = -I build -g
 files = lexer parser secd main
 test_files = $(wildcard tests/*)
 
-exec: $(foreach file, $(files), build/$(file).cmo)
-	ocamlc -o $@ $^ $(cargs)
-
 .PHONY: tests
 tests: exec
 	@for file in $(test_files); do \
@@ -12,7 +9,10 @@ tests: exec
 		./exec < $$file; \
 	done
 
-build/main.cmo: src/main.ml build/secd.cmo
+exec: $(foreach file, $(files), build/$(file).cmo)
+	ocamlc -o $@ $^ $(cargs)
+
+build/main.cmo: src/main.ml build/secd.cmo build/parser.cmo
 
 build/%.cmo: src/%.ml
 	@mkdir -p build

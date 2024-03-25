@@ -1,1 +1,1 @@
-lambda lambdaX.1
+(lambda lambdaX.1, 2)

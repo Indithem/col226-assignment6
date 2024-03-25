@@ -4,7 +4,7 @@
 
 %token LAMBDA
 %token LPAREN RPAREN LBRACE RBRACE
-%token SEP DOT EOF
+%token SEP DOT EOF COMMA
 
 %token<int> INT
 %token<string> VAR
@@ -32,7 +32,7 @@ expression:
     | expression DIVIDE expression {Operation (Div, $1, $3)}
 
     | LAMBDA VAR DOT expression {Lambda ($2, $4)}
-    | LPAREN expression expression RPAREN {Application ($2, $3)}
+    | LPAREN expression COMMA expression RPAREN {Application ($2, $4)}
 ;
 
 

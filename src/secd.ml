@@ -32,7 +32,7 @@ let rec compile e =
     | Operation (op, e1, e2) -> (compile e1) @ (compile e2) @ [OPERATE op]
     
     | Var s -> [LOOKUP s]
-    | Lambda (s, e) -> [MAKE_CLOSURE (s, compile e)] @ [RETURN]
+    | Lambda (s, e) -> [MAKE_CLOSURE (s, compile e @ [RETURN])]
     | Application (e1, e2) -> (compile e1) @ (compile e2) @ [APPLY_CLOSURE]
 ;;
 
