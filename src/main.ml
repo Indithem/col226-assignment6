@@ -60,7 +60,7 @@ let rec print_answers p a =
     | VClosure(x, ops, env) ->
       print_gaps p;
       Printf.printf "Value Closure with parameter %s in \n" x;
-      print_opcodes 1 ops;
+      print_opcodes (p+2) ops;
       print_gaps (p+1);
       Printf.printf "Environment:\n";
       StringMap.iter (fun k v -> print_gaps (p+2);Printf.printf "%s ->\n " k; print_answers (p+3) v) env

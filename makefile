@@ -1,6 +1,6 @@
 cargs = -I build -g
 files = lexer parser secd main
-test_files = $(wildcard tests/*)
+test_files ?= $(wildcard tests/*)
 
 .PHONY: tests
 tests: exec
