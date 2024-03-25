@@ -88,19 +88,21 @@ let print_dump dump =
   dump
 
 let main expr =
-  Printf.printf "Ast:\n";
+  Printf.printf "\x1B[33mAst:\n";
   print_ast 0 expr;
   let ops = compile expr in
-  Printf.printf "Op codes:\n";
+  Printf.printf "\x1B[34mOp codes:\n";
   print_code ops;
   try
     let result = secd_machine [] StringMap.empty ops [] in
-    Printf.printf "Result:\n";
-    print_answers 0 result
+    Printf.printf "\x1B[32mResult:\n";
+    print_answers 0 result;
   with
     | SECD_Exception (dmp, msg) ->
-      Printf.printf "SECD Execution error: %s\n" msg;
-      print_dump dmp
+      Printf.printf "\x1B[31mSECD Execution error: %s\n" msg;
+      print_dump dmp;
+    ;
+  Printf.printf "\x1B[00m";
 ;;
 
 let lexbufr = Lexing.from_channel stdin in
