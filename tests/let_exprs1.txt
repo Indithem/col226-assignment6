@@ -1,0 +1,5 @@
+# fails as y was used before declaration.
+
+let x = lambda z. z+y+2;
+let y = 4;
+(x,4)

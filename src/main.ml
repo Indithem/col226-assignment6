@@ -70,7 +70,7 @@ let rec print_opcodes p (opcodes:opcode list) =
         Printf.printf "CLOSURE with parameter %s in\n" x;
         print_opcodes (p+1) ops
       | RETURN -> Printf.printf "RETURN\n"
-      | APPLY_CLOSURE -> Printf.printf "APPLY\n"
+      | APPLY_CLOSURE -> Printf.printf "APPLY Closure\n"
       | IFTHENELSE (ops1, ops2) ->
         Printf.printf "IFTHENELSE IF:\n";
         print_opcodes (p+1) ops1;
@@ -82,7 +82,7 @@ let rec print_opcodes p (opcodes:opcode list) =
       | PROJECT intOps ->
         Printf.printf "PROJECTION of result \n";
         print_opcodes (p+1) intOps
-      | ASSIGN x -> Printf.printf "ASSIGN Variable %s\n" x
+      | ASSIGN x -> Printf.printf "ASSIGN to Variable %s\n" x
   in
   List.iter helper_printer opcodes
 
@@ -122,10 +122,11 @@ let print_dump dump =
   )
   dump
 
-let main expr =
+let main expr_list =
   Printf.printf "\x1B[33mAst:\n";
-  print_ast 0 expr;
-  let ops = compile expr in
+  List.iter (print_ast 0) expr_list;
+  let ops = List.flatten (List.map compile expr_list)
+  in
   Printf.printf "\x1B[34mOp codes:\n";
   print_code ops;
   try
@@ -144,7 +145,7 @@ let lexbufr = Lexing.from_channel stdin in
 try
 let expressions = Parser.main Lexer.lexer lexbufr in
 Printf.printf "Parsed %d statements\n" (List.length expressions);
-List.iter main expressions;
+main expressions
 with 
   Stdlib.Parsing.Parse_error ->
   begin

@@ -1,0 +1,4 @@
+let y = 4;
+let x = lambda z. z+y+2;
+let y = 7;
+(x,4)
