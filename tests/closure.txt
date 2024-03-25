@@ -1,0 +1,14 @@
+# an example from the internet
+# https://www.humankode.com/javascript/javascript-closures-made-easy/
+
+fn greet() = {
+    let Name = "John";
+
+    fn idk() = {
+        {"Hello", Name}
+    };
+    idk
+};
+
+let greeting = greet();
+greeting()

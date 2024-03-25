@@ -16,6 +16,8 @@ rule lexer = parse
     | "true" { BOOLCONST (true) }
     | "false" { BOOLCONST (false) }
     | "let" { LET }
+    | "fn" { FN }
+    | "print" { PRINT }
 
     | "first" { FIRST }
     
@@ -39,6 +41,8 @@ rule lexer = parse
     | "=" {EQUALS}
 
     | alphanumerics+ { VAR (Lexing.lexeme lexbuf) }
+
+    | '"' [^'"']* '"' as s { STRING s }
 
     | eof {EOF}
     | _  {raise (Failure ("illegal character '" ^ Lexing.lexeme lexbuf ^ "' while lexing"))}

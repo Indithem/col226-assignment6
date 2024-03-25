@@ -1,0 +1,16 @@
+fn setCount(number) = {
+
+    fn returnFunction() = {
+        let number = number +1;
+        number
+    };
+
+    returnFunction
+};
+
+let counter = setCount(0);
+let counter2 = setCount(1);
+
+print counter(); # 1
+print counter(); # should be 2, but since mutatable values are not yet implemented, it will be 2
+counter2(); # 2

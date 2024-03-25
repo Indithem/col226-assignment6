@@ -7,6 +7,7 @@ type inbuilt_operations =
 type inbuilt_const_types = 
   | Int of int
   | Bool of bool
+  | String of string
 
   (**The abract syntax tree of the assignment *)
 type expression = 
@@ -16,9 +17,12 @@ type expression =
   | Tuple of expression list
   | Project of expression * expression
   | Declaration of string * expression
+  | Function of string * string list * expression list
+  | Function_application of string * expression list
+  | Print of expression
 
   | Var of string
-  | Lambda of string * expression
+  | Lambda of string * expression list
   | Application of expression * expression
 ;;
 (** Operation Codes for the Stack machine *)
@@ -30,6 +34,7 @@ type opcode =
   | MAKE_TUPLE of opcode list list
   | PROJECT of opcode list
   | ASSIGN of string
+  | PRINT
 
   | LOOKUP of string
   | MAKE_CLOSURE of string * opcode list 
@@ -44,15 +49,27 @@ let rec compile e =
     | Operation (op, e1, e2) -> (compile e1) @ (compile e2) @ [OPERATE op]
     
     | Var s -> [LOOKUP s]
-    | Lambda (s, e) -> [MAKE_CLOSURE (s, compile e @ [RETURN])]
+    | Lambda (s, e) -> [MAKE_CLOSURE (s, (List.concat_map compile e) @ [RETURN])]
     | Application (e1, e2) -> (compile e1) @ (compile e2) @ [APPLY_CLOSURE]
     | Ifthenelse (e1, e2, e3) -> (compile e1) @ [IFTHENELSE (compile e2, compile e3)]
     | Tuple es -> [MAKE_TUPLE (List.map compile es)]
     | Project (i, e) -> (compile e) @ [PROJECT (compile i)]
     | Declaration (s, e) -> (compile e) @ [ASSIGN s]
+    | Function (x, vars, e) -> 
+      let rec lambda_expr vars=
+        match vars with 
+          | [] -> Lambda ("", e)
+          | [x] -> Lambda (x, e)
+          | x::xs -> Lambda (x, [lambda_expr xs])
+      in
+      compile (Declaration(x, lambda_expr (List.rev vars)))
+    | Function_application (f, es) ->
+      [LOOKUP f] @ 
+      (match es with | [] -> [PUSH (Int 0)] | _ -> List.concat_map compile es) 
+      @ [APPLY_CLOSURE]
+    | Print e -> (compile e) @ [PRINT]
 ;;
 
-type todo = unit;;
 module StringMap = Map.Make(String)
 
 type answers = 
@@ -68,6 +85,69 @@ type environment = answers StringMap.t
 type stack = answers list
 type code = opcode list
 type dump = (stack * environment * code) list
+
+let print_gaps n =
+  for i = 1 to n do
+    Printf.printf "  "
+  done;
+  if n > 0 then Printf.printf "|__"
+;;
+
+let print_const_inbuilt c =
+  match c with
+    | Int i -> Printf.printf "Int: %d\n" i
+    | Bool b -> Printf.printf "Bool: %b\n" b
+    | String s -> Printf.printf "String: %s\n" s
+
+let rec print_opcodes p (opcodes:opcode list) =
+  let helper_printer opcode =
+    print_gaps p;
+    match opcode with
+      | PUSH c ->  Printf.printf "PUSH ";print_const_inbuilt c
+      | POP -> Printf.printf "POP\n"
+      | OPERATE op ->
+        let op_str = match op with
+          | Add -> "Add"
+          | Sub -> "Sub"
+          | Mul -> "Mul"
+          | Div -> "Div"
+        in
+        Printf.printf "OPERATION %s\n" op_str
+      | LOOKUP x -> Printf.printf "LOOKUP Variable %s\n" x
+      | MAKE_CLOSURE (x, ops) ->
+        Printf.printf "CLOSURE with parameter %s in\n" x;
+        print_opcodes (p+1) ops
+      | RETURN -> Printf.printf "RETURN\n"
+      | APPLY_CLOSURE -> Printf.printf "APPLY Closure\n"
+      | IFTHENELSE (ops1, ops2) ->
+        Printf.printf "IFTHENELSE IF:\n";
+        print_opcodes (p+1) ops1;
+        Printf.printf "ELSE:\n";
+        print_opcodes (p+1) ops2
+      | MAKE_TUPLE opslist ->
+        Printf.printf "PUSH TUPLE LIST with %d elements\n" (List.length opslist);
+        List.iter (fun ops -> print_opcodes (p+1) ops) opslist
+      | PROJECT intOps ->
+        Printf.printf "PROJECTION of result \n";
+        print_opcodes (p+1) intOps
+      | ASSIGN x -> Printf.printf "ASSIGN to Variable %s\n" x
+      | PRINT -> Printf.printf "PRINT\n"
+  in
+  List.iter helper_printer opcodes
+
+let rec print_answers p a =
+  print_gaps p;
+  match a with
+    | Const c -> print_const_inbuilt c
+    | VClosure(x, ops, env) ->
+      Printf.printf "Value Closure with parameter %s in \n" x;
+      print_opcodes (p+2) ops;
+      print_gaps (p+1);
+      Printf.printf "Environment:\n";
+      StringMap.iter (fun k v -> print_gaps (p+2);Printf.printf "%s ->\n " k; print_answers (p+3) v) env
+    | Tuple vs ->
+      Printf.printf "Answer Tuple List with %d elements\n" (List.length vs);
+      List.iter (fun v -> print_answers (p+1) v) vs
 
 exception SECD_Exception of dump * string
 let rec secd_machine (s:stack) (e:environment) (c:code) (d:dump) =
@@ -111,6 +191,9 @@ let rec secd_machine (s:stack) (e:environment) (c:code) (d:dump) =
       secd_machine (v::s) e c d
     | a::s, e, ASSIGN x::c, d -> 
       secd_machine s (bind x a e) c d
+    | a::s, e, PRINT::c, d -> 
+      print_answers 0 a;
+      secd_machine s e c d
 
     | s, e, LOOKUP x::c, d -> 
       let v = 

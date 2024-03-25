@@ -1,14 +1,4 @@
-let print_gaps n =
-  for i = 1 to n do
-    Printf.printf "  "
-  done;
-  if n > 0 then Printf.printf "|__"
-;;
 open Secd;;
-let print_const_inbuilt c =
-  match c with
-    | Int i -> Printf.printf "Int: %d\n" i
-    | Bool b -> Printf.printf "Bool: %b\n" b
 let rec print_ast p (ast:expression)=
   print_gaps p;
   match ast with
@@ -26,7 +16,7 @@ let rec print_ast p (ast:expression)=
     print_ast (p+1) e2
   | Lambda (x, e) ->
     Printf.printf "Lambda: with parameter %s\n" x;
-    print_ast (p+1) e
+    List.iter (print_ast (p+1)) e
   | Application (e1, e2) ->
     Printf.printf "Application:\n";
     print_ast (p+1) e1;
@@ -34,8 +24,10 @@ let rec print_ast p (ast:expression)=
   | Ifthenelse (e1, e2, e3) ->
     Printf.printf "If:\n";
     print_ast (p+1) e1;
+    print_gaps p;
     Printf.printf "Then:\n";
     print_ast (p+2) e2;
+    print_gaps p;
     Printf.printf "Else:\n";
     print_ast (p+2) e3
   | Tuple es ->
@@ -44,61 +36,25 @@ let rec print_ast p (ast:expression)=
   | Project (i, e) ->
     Printf.printf "Projection of {}th element evaluated by \n";
     print_ast (p+1) i;
+    print_gaps p;
     Printf.printf "from the tuple:\n";
     print_ast (p+1) e
   | Declaration (v, e) ->
     Printf.printf "Declaration of variable %s\n" v;
     print_ast (p+1) e
-;;
-
-let rec print_opcodes p (opcodes:opcode list) =
-  let helper_printer opcode =
+  | Function (f, xs, e) ->
+    Printf.printf "Function %s with parameters:\n" f;
+    List.iter (fun x -> print_gaps (p+1);Printf.printf "%s\n" x) xs;
     print_gaps p;
-    match opcode with
-      | PUSH c ->  Printf.printf "PUSH ";print_const_inbuilt c
-      | POP -> Printf.printf "POP\n"
-      | OPERATE op ->
-        let op_str = match op with
-          | Add -> "Add"
-          | Sub -> "Sub"
-          | Mul -> "Mul"
-          | Div -> "Div"
-        in
-        Printf.printf "OPERATION %s\n" op_str
-      | LOOKUP x -> Printf.printf "LOOKUP Variable %s\n" x
-      | MAKE_CLOSURE (x, ops) ->
-        Printf.printf "CLOSURE with parameter %s in\n" x;
-        print_opcodes (p+1) ops
-      | RETURN -> Printf.printf "RETURN\n"
-      | APPLY_CLOSURE -> Printf.printf "APPLY Closure\n"
-      | IFTHENELSE (ops1, ops2) ->
-        Printf.printf "IFTHENELSE IF:\n";
-        print_opcodes (p+1) ops1;
-        Printf.printf "ELSE:\n";
-        print_opcodes (p+1) ops2
-      | MAKE_TUPLE opslist ->
-        Printf.printf "PUSH TUPLE LIST with %d elements\n" (List.length opslist);
-        List.iter (fun ops -> print_opcodes (p+1) ops) opslist
-      | PROJECT intOps ->
-        Printf.printf "PROJECTION of result \n";
-        print_opcodes (p+1) intOps
-      | ASSIGN x -> Printf.printf "ASSIGN to Variable %s\n" x
-  in
-  List.iter helper_printer opcodes
-
-let rec print_answers p a =
-  print_gaps p;
-  match a with
-    | Const c -> print_const_inbuilt c
-    | VClosure(x, ops, env) ->
-      Printf.printf "Value Closure with parameter %s in \n" x;
-      print_opcodes (p+2) ops;
-      print_gaps (p+1);
-      Printf.printf "Environment:\n";
-      StringMap.iter (fun k v -> print_gaps (p+2);Printf.printf "%s ->\n " k; print_answers (p+3) v) env
-    | Tuple vs ->
-      Printf.printf "Answer Tuple List with %d elements\n" (List.length vs);
-      List.iter (fun v -> print_answers (p+1) v) vs
+    Printf.printf "Body:\n";
+    List.iter (print_ast (p+1)) e
+  | Function_application (f, es) ->
+    Printf.printf "Function application of %s with arguments:\n" f;
+    List.iter (print_ast (p+1)) es
+  | Print e ->
+    Printf.printf "Print:\n";
+    print_ast (p+1) e
+;;
 
 let print_environment env =
   StringMap.iter (fun k v -> Printf.printf "%s -> " k; print_answers 0 v) env
@@ -129,9 +85,10 @@ let main expr_list =
   in
   Printf.printf "\x1B[34mOp codes:\n";
   print_code ops;
+  Printf.printf "\x1B[32m";
   try
     let result = secd_machine [] StringMap.empty ops [] in
-    Printf.printf "\x1B[32mResult:\n";
+    Printf.printf "Result:\n";
     print_answers 0 result;
   with
     | SECD_Exception (dmp, msg) ->
