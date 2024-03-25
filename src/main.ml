@@ -5,10 +5,14 @@ let print_gaps n =
   if n > 0 then Printf.printf "|__"
 ;;
 open Secd;;
+let print_const_inbuilt c =
+  match c with
+    | Int i -> Printf.printf "Int: %d\n" i
+    | Bool b -> Printf.printf "Bool: %b\n" b
 let rec print_ast p (ast:expression)=
   print_gaps p;
   match ast with
-  | Int i -> Printf.printf "Int: %d\n" i
+  | Const c -> print_const_inbuilt c
   | Var x -> Printf.printf "Variable: %s\n" x
   | Operation (op, e1, e2) ->
     let op_str = match op with
@@ -27,13 +31,20 @@ let rec print_ast p (ast:expression)=
     Printf.printf "Application:\n";
     print_ast (p+1) e1;
     print_ast (p+1) e2
+  | Ifthenelse (e1, e2, e3) ->
+    Printf.printf "If:\n";
+    print_ast (p+1) e1;
+    Printf.printf "Then:\n";
+    print_ast (p+2) e2;
+    Printf.printf "Else:\n";
+    print_ast (p+2) e3
 ;;
 
 let rec print_opcodes p (opcodes:opcode list) =
   let helper_printer opcode =
     print_gaps p;
     match opcode with
-      | PUSH i -> Printf.printf "PUSH %d\n" i
+      | PUSH c ->  Printf.printf "PUSH ";print_const_inbuilt c
       | POP -> Printf.printf "POP\n"
       | OPERATE op ->
         let op_str = match op with
@@ -49,14 +60,17 @@ let rec print_opcodes p (opcodes:opcode list) =
         print_opcodes (p+1) ops
       | RETURN -> Printf.printf "RETURN\n"
       | APPLY_CLOSURE -> Printf.printf "APPLY\n"
+      | IFTHENELSE (ops1, ops2) ->
+        Printf.printf "IFTHENELSE IF:\n";
+        print_opcodes (p+1) ops1;
+        Printf.printf "ELSE:\n";
+        print_opcodes (p+1) ops2
   in
   List.iter helper_printer opcodes
 
 let rec print_answers p a =
   match a with
-    | Int i -> 
-      print_gaps p;
-      Printf.printf "Int: %d\n" i;
+    | Const c -> print_gaps p; print_const_inbuilt c
     | VClosure(x, ops, env) ->
       print_gaps p;
       Printf.printf "Value Closure with parameter %s in \n" x;
@@ -118,5 +132,5 @@ with
     let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
     let tok = Lexing.lexeme lexbufr in
     (* let tail = Sql_lexer.ruleTail "" lexbufr in *)
-    Printf.printf "Syntax error at line %d, character %d, token %s\n" line cnum tok;
+    Printf.printf "\x1B[31mSyntax error at line %d, character %d, token %s\x1B[00m\n" line cnum tok;
   end

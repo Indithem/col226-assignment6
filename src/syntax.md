@@ -2,6 +2,8 @@ This file describes the Surface Syntax and grammar of the toy language.
 
 # Reserved Keywords
 - `lambda` : Incanation of a lambda expression.
+- `true`, `false` : Boolean literals.
+- `if-then-else` : Ternary conditional operator.
 
 # Grammar
 ## Lambda Expressions

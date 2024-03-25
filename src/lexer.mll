@@ -11,6 +11,10 @@ rule lexer = parse
     | "#" [^'\n']* { lexer lexbuf }
 
     | "lambda" { LAMBDA }
+
+    | "ifthenelse" { IFTHENELSE }
+    | "true" { BOOLCONST (true) }
+    | "false" { BOOLCONST (false) }
     
     | "+" { PLUS }
     | "-" { MINUS }
