@@ -15,6 +15,7 @@ rule lexer = parse
     | "ifthenelse" { IFTHENELSE }
     | "true" { BOOLCONST (true) }
     | "false" { BOOLCONST (false) }
+    | "let" { LET }
 
     | "first" { FIRST }
     
@@ -35,6 +36,7 @@ rule lexer = parse
     | ";" {SEP}
     | "." {DOT}
     | "," {COMMA}
+    | "=" {EQUALS}
 
     | alphanumerics+ { VAR (Lexing.lexeme lexbuf) }
 

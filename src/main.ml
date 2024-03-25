@@ -46,6 +46,9 @@ let rec print_ast p (ast:expression)=
     print_ast (p+1) i;
     Printf.printf "from the tuple:\n";
     print_ast (p+1) e
+  | Declaration (v, e) ->
+    Printf.printf "Declaration of variable %s\n" v;
+    print_ast (p+1) e
 ;;
 
 let rec print_opcodes p (opcodes:opcode list) =
@@ -79,6 +82,7 @@ let rec print_opcodes p (opcodes:opcode list) =
       | PROJECT intOps ->
         Printf.printf "PROJECTION of result \n";
         print_opcodes (p+1) intOps
+      | ASSIGN x -> Printf.printf "ASSIGN Variable %s\n" x
   in
   List.iter helper_printer opcodes
 

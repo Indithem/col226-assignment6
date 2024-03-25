@@ -5,6 +5,7 @@ This file describes the Surface Syntax and grammar of the toy language.
 - `true`, `false` : Boolean literals.
 - `if-then-else` : Ternary conditional operator.
 - `first`: First element of a tuple.
+- `let` : Variable declaration.
 
 ## Surface Syntax
 - `(e , e)` : Lambda expression application.
@@ -12,6 +13,7 @@ This file describes the Surface Syntax and grammar of the toy language.
 - `{e , e , ...}` : Tuple|List expression.
 - `e.first` : First element of a tuple.
 - `e.<int n>` : Access the nth (zero based) element of a tuple. (evaluated at runtime)
+- `let <var> = <expr>` : Variable declaration.
 
 # Grammar
 ## Lambda Expressions

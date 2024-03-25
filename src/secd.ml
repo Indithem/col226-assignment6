@@ -15,6 +15,7 @@ type expression =
   | Ifthenelse of expression * expression * expression
   | Tuple of expression list
   | Project of expression * expression
+  | Declaration of string * expression
 
   | Var of string
   | Lambda of string * expression
@@ -28,6 +29,7 @@ type opcode =
   | IFTHENELSE of opcode list * opcode list
   | MAKE_TUPLE of opcode list list
   | PROJECT of opcode list
+  | ASSIGN of string
 
   | LOOKUP of string
   | MAKE_CLOSURE of string * opcode list 
@@ -47,6 +49,7 @@ let rec compile e =
     | Ifthenelse (e1, e2, e3) -> (compile e1) @ [IFTHENELSE (compile e2, compile e3)]
     | Tuple es -> [MAKE_TUPLE (List.map compile es)]
     | Project (i, e) -> (compile e) @ [PROJECT (compile i)]
+    | Declaration (s, e) -> (compile e) @ [ASSIGN s]
 ;;
 
 type todo = unit;;
@@ -106,6 +109,8 @@ let rec secd_machine (s:stack) (e:environment) (c:code) (d:dump) =
         with _ -> raise (SECD_Exception (((s,e,c)::d),"Index out of bounds"))
       in
       secd_machine (v::s) e c d
+    | a::s, e, ASSIGN x::c, d -> 
+      secd_machine s (bind x a e) c d
 
     | s, e, LOOKUP x::c, d -> 
       let v = 

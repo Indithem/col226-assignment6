@@ -4,13 +4,13 @@
 
 %token LAMBDA
 %token LPAREN RPAREN LBRACE RBRACE
-%token SEP DOT EOF COMMA
+%token SEP DOT EOF COMMA EQUALS
 
 %token<int> INT
 %token<string> VAR
 %token PLUS MINUS TIMES DIVIDE
 %token<bool> BOOLCONST
-%token IFTHENELSE FIRST
+%token IFTHENELSE FIRST LET
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -37,6 +37,7 @@ expression:
     | expression TIMES expression {Operation (Mul, $1, $3)}
     | expression DIVIDE expression {Operation (Div, $1, $3)}
     | expression IFTHENELSE expression COMMA expression {Ifthenelse ($1, $3, $5)}
+    | LET VAR EQUALS expression {Declaration ($2, $4)}
 
     | LAMBDA VAR DOT expression {Lambda ($2, $4)}
     | LPAREN expression COMMA expression RPAREN {Application ($2, $4)}
