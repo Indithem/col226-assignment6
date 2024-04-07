@@ -36,7 +36,7 @@ let rec print_ast p (ast:expression)=
     Printf.printf "Application:\n";
     print_ast (p+1) e1;
     print_ast (p+1) e2
-  (* | Ifthenelse (e1, e2, e3) ->
+  | Ifthenelse (e1, e2, e3) ->
     Printf.printf "If:\n";
     print_ast (p+1) e1;
     print_gaps p;
@@ -44,7 +44,7 @@ let rec print_ast p (ast:expression)=
     print_ast (p+2) e2;
     print_gaps p;
     Printf.printf "Else:\n";
-    print_ast (p+2) e3 *)
+    print_ast (p+2) e3
   | Tuple es ->
     Printf.printf "Tuple List:\n";
     List.iter (fun e -> print_ast (p+1) e) es

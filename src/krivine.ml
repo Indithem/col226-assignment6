@@ -13,7 +13,8 @@ type inbuilt_const_types =
 type expression = 
   | Const of inbuilt_const_types
   | Operation of inbuilt_operations * expression * expression
-  (* | Ifthenelse of expression * expression * expression *)
+  (* Ifthenelse of bool * exp1 * exp2 *)
+  | Ifthenelse of expression * expression * expression
   | Tuple of expression list
   (* Project of index from tuple *)
   | Project of expression * expression
@@ -96,6 +97,13 @@ let rec krivine_machine focus (s:stack) =
         | Failure _ -> raise (Krivine_error ("Index out of bounds", focus::s))
         | Invalid_argument _ -> raise (Krivine_error ("Invalid index", focus::s))) in
       krivine_machine (CLOSURE(expr, environment)) s
+
+    | Ifthenelse (e1, e2, e3), s->
+      let c1 = krivine_machine (CLOSURE(e1, environment)) s in
+      let res = match c1 with
+        | CLOSURE (Const (Bool b), _) -> if b then e2 else e3
+        | _ -> raise (Krivine_error ("Invalid condition", focus::s)) in
+      krivine_machine (CLOSURE(res, environment)) s
     
     (* KrOp *)
     | Application (e1, e2), s ->
