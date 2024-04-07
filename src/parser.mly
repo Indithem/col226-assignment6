@@ -32,9 +32,9 @@ expression_body:
 
 expression:
     | LBRACE expression RBRACE {$2}
-    // | LBRACE list_expression RBRACE {Tuple $2}
-    // | FIRST LBRACE list_expression RBRACE {Project (Const(Int 0), Tuple($3))}
-    // | LBRACE list_expression RBRACE DOT expression {Project ($5, Tuple $2)}
+    | LBRACE list_expression RBRACE {Tuple $2}
+    | FIRST LBRACE list_expression RBRACE {Project (Const(Int 0), Tuple($3))}
+    | LBRACE list_expression RBRACE DOT expression {Project ($5, Tuple $2)}
     | BOOLCONST {Const (Bool $1)}
     | INT {Const (Int $1)}
     | STRING {Const (String $1)}
@@ -53,11 +53,11 @@ expression:
     | LPAREN expression COMMA expression RPAREN {Application ($2, $4)}
 ;
 
-// list_expression:
-//     | {[]}
-//     | expression {[$1]}
-//     | expression COMMA list_expression {$1::$3}
-// ;
+list_expression:
+    | {[]}
+    | expression {[$1]}
+    | expression COMMA list_expression {$1::$3}
+;
 
 // function_def:
 //     | FN VAR LPAREN vars_list RPAREN EQUALS LBRACE expression_body RBRACE {Function ($2, $4, $8)}

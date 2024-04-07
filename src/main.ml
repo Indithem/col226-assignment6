@@ -45,7 +45,7 @@ let rec print_ast p (ast:expression)=
     print_gaps p;
     Printf.printf "Else:\n";
     print_ast (p+2) e3 *)
-  (* | Tuple es ->
+  | Tuple es ->
     Printf.printf "Tuple List:\n";
     List.iter (fun e -> print_ast (p+1) e) es
   | Project (i, e) ->
@@ -53,7 +53,7 @@ let rec print_ast p (ast:expression)=
     print_ast (p+1) i;
     print_gaps p;
     Printf.printf "from the tuple:\n";
-    print_ast (p+1) e *)
+    print_ast (p+1) e
   (* | Declaration (v, e) ->
     Printf.printf "Declaration of variable %s\n" v;
     print_ast (p+1) e *)
@@ -71,28 +71,8 @@ let rec print_ast p (ast:expression)=
     print_ast (p+1) e *)
 ;;
 
-let rec print_krivine_expression p e =
-  print_gaps p;
-  match e with
-    | CONST c -> print_const_inbuilt c
-    | LOOKUP x -> Printf.printf "Variable: %s\n" x
-    | OPERATION (op, e1, e2) ->
-      let op_str = match op with
-        | Add -> "Add"
-        | Sub -> "Sub"
-        | Mul -> "Mul"
-        | Div -> "Div"
-      in
-      Printf.printf "Operation: %s\n" op_str;
-      print_krivine_expression (p+1) e1;
-      print_krivine_expression (p+1) e2
-    | APPLICATION (e1, e2) ->
-      Printf.printf "Application:\n";
-      print_krivine_expression (p+1) e1;
-      print_krivine_expression (p+1) e2
-    | LAMBDA_ABSTR(x, e) ->
-      Printf.printf "Lambda: with parameter %s\n" x;
-      print_krivine_expression (p+1) e
+let print_krivine_expression p e =
+  print_ast p e
 
 let rec print_closure p c =
   print_gaps p;
