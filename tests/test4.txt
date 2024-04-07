@@ -1,1 +1,3 @@
 (lambda x. lambda y. x + y,3+6)
+# we would see in the resultant closure that x is not yet evaluated to 9, it retains 
+# its expression form 3+6

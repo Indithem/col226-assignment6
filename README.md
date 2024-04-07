@@ -1,8 +1,9 @@
-# SECD Machine
-This is an implementation of SECD machine for a simple toy language in OCaml.
+# SECD Machine and Krivine Machine
+This is an implementation of SECD machine for a simple toy language in OCaml. See branch SECD for the SECD machine and branch Krivine for the Krivine machine.
 
 ## Key Points
 - The SECD machine implements Call-by Value semantics. (**not** lazy evaluation)
+- The Krivine machine implements Call-by Name semantics. (kind of lazy evaluation)
 - All results/answers are actually closures.
     * This means that any constant is actually a constant lambda expression with an null environment.
 
