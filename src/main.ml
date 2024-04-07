@@ -54,9 +54,9 @@ let rec print_ast p (ast:expression)=
     print_gaps p;
     Printf.printf "from the tuple:\n";
     print_ast (p+1) e
-  (* | Declaration (v, e) ->
+  | Declaration (v, e) ->
     Printf.printf "Declaration of variable %s\n" v;
-    print_ast (p+1) e *)
+    print_ast (p+1) e
   (* | Function (f, xs, e) ->
     Printf.printf "Function %s with parameters:\n" f;
     List.iter (fun x -> print_gaps (p+1);Printf.printf "%s\n" x) xs;
@@ -75,30 +75,41 @@ let print_krivine_expression p e =
   print_ast p e
 
 let rec print_closure p c =
-  print_gaps p;
   match c with
-    | CLOSURE (e, env) ->
-      Printf.printf "Closure:\n";
+  | CLOSURE (e, env) ->
+      print_gaps p; Printf.printf "Closure with expression:\n";
       print_krivine_expression (p+1) e;
+      print_gaps p; Printf.printf "Environment:\n";
       StringMap.iter (fun k v -> print_gaps (p+1);Printf.printf "Variable: %s\n" k;print_closure (p+2) v) env
 ;;
 let main expr_list =
-  let evaluate p krivine_expression = 
-    Printf.printf "\x1B[00mEvaluating expression %d\n" p;
+  let p = ref 0 in
+  let evaluate env krivine_expression = 
+    Printf.printf "\x1B[00mEvaluating expression %d\n" !p;
+    if Sys.getenv "DEBUG" = "1" then (
+      print_closure 0 (CLOSURE(krivine_expression, env));
+    );
+    p := !p + 1;
     try
       let result = 
-      krivine_machine (CLOSURE(krivine_expression, StringMap.empty)) [] 
+      krivine_machine (CLOSURE(krivine_expression, env)) [] 
       in
       Printf.printf "\x1B[32mResult:\n";
       print_closure 0 result;
+      match result with CLOSURE (_, env) -> env
     with
-      | Krivine_error(error, stack) -> Printf.printf "\x1B[31mError: %s\n" error; List.iter (fun c -> print_closure 0 c) stack; 
+      | Krivine_error(error, stack) -> Printf.printf "\x1B[31mError: %s\n" error; List.iter (print_closure 0) stack; env
   in
-  Printf.printf "\x1B[33mAst:\n";
-  List.iter (print_ast 0) expr_list;
-  let krivine_expressions = (List.map compile expr_list)
-  in
-  List.iteri evaluate krivine_expressions;
+  if Sys.getenv "DEBUG" = "1" then (
+    Printf.printf "\x1B[33mAst:\n";
+    List.iter (print_ast 0) expr_list;
+  );
+  let krivine_expressions = (List.map compile expr_list) in
+  if Sys.getenv "DEBUG" = "1" then (
+    Printf.printf "\x1B[34mCompiled:\n";
+    List.iter (print_ast 0) krivine_expressions;
+  );
+  List.fold_left evaluate StringMap.empty krivine_expressions;
   Printf.printf "\x1B[00m";
 ;;
 

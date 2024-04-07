@@ -44,7 +44,7 @@ expression:
     | expression TIMES expression {Operation (Mul, $1, $3)}
     | expression DIVIDE expression {Operation (Div, $1, $3)}
     | expression IFTHENELSE expression COMMA expression {Ifthenelse ($1, $3, $5)}
-    // | LET VAR EQUALS expression {Declaration ($2, $4)}
+    | LET VAR EQUALS expression {Declaration ($2, $4)}
     // | function_def {$1} 
     // | VAR LPAREN list_expression RPAREN {Function_application ($1, $3)}
     // | PRINT expression {Print $2}

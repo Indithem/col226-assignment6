@@ -18,7 +18,7 @@ type expression =
   | Tuple of expression list
   (* Project of index from tuple *)
   | Project of expression * expression
-  (* | Declaration of string * expression *)
+  | Declaration of string * expression
   (* | Function of string * string list * expression list *)
   (* | Function_application of string * expression list *)
   (* | Print of expression *)
@@ -73,9 +73,12 @@ let rec krivine_machine focus (s:stack) =
         Tuple (List.map eval_expr es)
         , StringMap.empty
       )
+    | Declaration (x, e), s ->  
+      let new_env = StringMap.add x (krivine_machine (CLOSURE(e, environment)) []) environment in
+      CLOSURE (expression, new_env)
     | Operation (op, e1, e2), s ->
-      let c1 = krivine_machine (CLOSURE(e1, environment)) s  in
-      let c2 = krivine_machine (CLOSURE(e2, environment)) s in
+      let c1 = krivine_machine (CLOSURE(e1, environment)) [] in
+      let c2 = krivine_machine (CLOSURE(e2, environment)) [] in
       let res = 
         match c1, c2 with
           | CLOSURE (Const (Int i1), _), CLOSURE (Const (Int i2), _) -> 
@@ -117,4 +120,4 @@ let rec krivine_machine focus (s:stack) =
     | Lambda (x, e), cl::s ->
       krivine_machine (CLOSURE(e, StringMap.add x cl environment)) s
         
-    | _ -> raise (Krivine_error ("Invalid State", focus::s))
+    | _ -> focus

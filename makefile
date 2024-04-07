@@ -1,6 +1,9 @@
 cargs = -I build -g
 files = lexer parser krivine main
 test_files ?= $(wildcard tests/*)
+debug ?= false
+
+tests: export DEBUG=$(debug)
 
 .PHONY: tests
 tests: exec
