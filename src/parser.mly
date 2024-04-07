@@ -11,7 +11,7 @@
 %token<string> STRING
 %token PLUS MINUS TIMES DIVIDE
 %token<bool> BOOLCONST
-%token IFTHENELSE FIRST LET FN PRINT
+%token IFTHENELSE FIRST LET FN
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -47,7 +47,6 @@ expression:
     | LET VAR EQUALS expression {Declaration ($2, $4)}
     // | function_def {$1} 
     // | VAR LPAREN list_expression RPAREN {Function_application ($1, $3)}
-    // | PRINT expression {Print $2}
 
     | LAMBDA VAR DOT expression {Lambda ($2, $4)}
     | LPAREN expression COMMA expression RPAREN {Application ($2, $4)}

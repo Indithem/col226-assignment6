@@ -17,7 +17,6 @@ rule lexer = parse
     | "false" { BOOLCONST (false) }
     | "let" { LET }
     | "fn" { FN }
-    | "print" { PRINT }
 
     | "first" { FIRST }
     
